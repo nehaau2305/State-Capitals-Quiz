@@ -17,7 +17,7 @@ public class FragmentHostActivity extends AppCompatActivity {
         Fragment fragment = null;
         switch(fragmentType) {
             case "quiz":
-                fragment = new QuizQuestionFragment();
+                fragment = new QuizFragment();
                 break;
             case "history":
                 fragment = new HistoryFragment();
