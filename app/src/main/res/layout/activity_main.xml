@@ -51,21 +51,23 @@
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
         android:backgroundTint="#C7AA00"
         android:fontFamily="@font/amaranth"
         android:text="Start Quiz"
-        android:textSize="25sp"
+        android:textSize="33sp"
         app:strokeColor="#FFFFFFFF" />
 
     <Button
         android:id="@+id/button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
         android:backgroundTint="#EAF6F4"
         android:fontFamily="@font/amaranth"
         android:text="View Past Quizzes"
         android:textColor="#264D46"
-        android:textSize="20sp"
+        android:textSize="24sp"
         app:strokeColor="#264D46"
         app:strokeWidth="3dp" />
 
@@ -73,10 +75,11 @@
         android:id="@+id/button3"
         android:layout_width="40dp"
         android:layout_height="40dp"
+        android:layout_margin="5dp"
         android:background="@drawable/circle_button"
         android:gravity="center"
         android:padding="0dp"
         android:text="?"
         android:textColor="#FFFFFF"
-        android:textSize="20sp"/>
+        android:textSize="20sp" />
 </LinearLayout>
