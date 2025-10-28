@@ -44,23 +44,17 @@ public class MainActivity extends AppCompatActivity {
 
     private class ButtonClickListener implements View.OnClickListener {
         public void onClick(View v) {
-            Fragment fragment = null;
-            Intent intent = new Intent(MainActivity.this, FragmentHostActivity.class)
+            Intent intent = new Intent(MainActivity.this, FragmentHostActivity.class);
 
-            // Create a new fragment based on the used selection in the nav drawer
-            switch(v.getId()) {
-                case R.id.button:
-                    intent.putExtra("fragment type", "quiz");
-                    break;
-                case R.id.button2:
-                    intent.putExtra("fragment type", "history");
-                    break;
-                case R.id.button3:
-                    intent.putExtra("fragment type", "help");
-                    break;
+            // do not use switch case bc R.id.button is not a final constant, which is necessary for case
+            if (v.getId() == R.id.button) {
+                intent.putExtra("fragmentType", "quiz");
+            } else if (v.getId() == R.id.button2) {
+                intent.putExtra("fragmentType", "history");
+            } else if (v.getId() == R.id.button3) {
+                intent.putExtra("fragmentType", "help");
             }
             startActivity(intent);
-
         } //onClick
     } //ButtonClickListener
 }
