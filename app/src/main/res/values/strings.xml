@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">State Capitals Quiz</string>
+
+    <string name="help_fragment_text">
+        <![CDATA[
+            <h3>State Capitals Quiz</h3> <p>This app will quiz you of 6 different capital cities from a US state.
+            After selecting the desired answer to a question, swipe left to proceed to the next question. After all
+            6 questions have been answered, your score will be calculated. View how you have improved your score under
+            "Quiz History". You can revisit this help page at any time to view this information again. </p>
+        ]]>
+    </string>
 </resources>
