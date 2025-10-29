@@ -17,6 +17,7 @@
         android:text="What is the capital of"
         android:textColor="#264D46"
         android:textSize="45sp"
+        android:fontFamily="@font/amaranth"
         app:layout_constraintBottom_toTopOf="@+id/textView5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -33,6 +34,7 @@
         android:text="stateName"
         android:textColor="#C7AA00"
         android:textSize="60dp"
+        android:fontFamily="@font/amaranth"
         app:layout_constraintBottom_toTopOf="@+id/radioGroup"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
@@ -53,7 +55,8 @@
             android:id="@+id/radioButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="RadioButton"
+            android:text="city"
+            android:fontFamily="@font/amaranth"
             android:textColor="#264D46"
             android:textSize="25sp" />
 
@@ -61,7 +64,8 @@
             android:id="@+id/radioButton2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="RadioButton"
+            android:text="city"
+            android:fontFamily="@font/amaranth"
             android:textColor="#264D46"
             android:textSize="25sp" />
 
@@ -69,7 +73,8 @@
             android:id="@+id/radioButton3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="RadioButton"
+            android:text="city"
+            android:fontFamily="@font/amaranth"
             android:textColor="#264D46"
             android:textSize="25sp" />
     </RadioGroup>
