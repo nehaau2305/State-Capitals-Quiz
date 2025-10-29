@@ -13,6 +13,10 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+/**
+ * MainActivity initializes the initial screen displayed to users. Users can navigate
+ * to the next screen be selecting 1 of the 3 buttons displayed.
+ */
 public class MainActivity extends AppCompatActivity {
 
     // define variables

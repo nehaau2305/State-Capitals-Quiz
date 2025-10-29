@@ -5,6 +5,10 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+/**
+ * The FragmentHostActivity manages which fragment is displayed in the fragment
+ * container depending on user input.
+ */
 public class FragmentHostActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {

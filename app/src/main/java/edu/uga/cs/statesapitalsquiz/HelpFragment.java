@@ -11,7 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-
+/**
+ * The HelpFragment is displayed when the user selects the question mark button
+ * on the initial screen. This fragment loads a text describing the app's purpose
+ * & how to navigate it.
+ */
 public class HelpFragment extends Fragment {
 
     public HelpFragment() {
