@@ -1,30 +1,32 @@
 package edu.uga.cs.statesapitalsquiz;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-/**
- * QuizPagerAdapter will be used to implement the horizontal swiping
- * layout for the quiz questions. FragmentStateAdapter is an abstract
- * class which requires QuizPagerAdapter to implement the abstract method
- * createFragment. The number of fragments needed must also be specified
- * by the getItemCount method.
- */
+import java.util.ArrayList;
+
 public class QuizPagerAdapter extends FragmentStateAdapter {
 
-    public QuizPagerAdapter(FragmentManager fragmentManager, Lifecycle lifecycle) {
-        super(fragmentManager, lifecycle);
+    private final ArrayList<Fragment> pages;
+
+    public QuizPagerAdapter(@NonNull FragmentManager fm,
+                            @NonNull Lifecycle lifecycle,
+                            ArrayList<Fragment> pages) {
+        super(fm, lifecycle);
+        this.pages = pages;
+    }
+
+    @NonNull
+    @Override
+    public Fragment createFragment(int position) {
+        return pages.get(position);
     }
 
     @Override
-    public Fragment createFragment(int position){
-        return QuizFragment.newInstance(position);
-    }
-    
-    @Override
     public int getItemCount() {
-        return 6;
+        return pages.size();
     }
 }
