@@ -11,12 +11,13 @@
         android:id="@+id/resultsTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Results"
-        android:textSize="36sp"
-        android:textColor="#264D46"
+        android:layout_marginTop="20dp"
         android:fontFamily="@font/amaranth"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        android:text="Results"
+        android:textColor="#264D46"
+        android:textSize="36sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/scoreText"
@@ -34,27 +35,29 @@
         android:id="@+id/backHomeBtn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Back to Home"
-        android:fontFamily="@font/amaranth"
-        android:textSize="18sp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="20dp"
         android:backgroundTint="#C7AA00"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/viewHistoryBtn"
+        android:fontFamily="@font/amaranth"
+        android:text="Back to Home"
+        android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginEnd="8dp"/>
+        app:layout_constraintEnd_toStartOf="@+id/viewHistoryBtn"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/viewHistoryBtn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="View History"
-        android:fontFamily="@font/amaranth"
-        android:textSize="18sp"
-        android:textColor="#264D46"
+        android:layout_marginBottom="20dp"
         android:backgroundTint="#EAF6F4"
-        app:layout_constraintStart_toEndOf="@+id/backHomeBtn"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:fontFamily="@font/amaranth"
+        android:text="View History"
+        android:textColor="#264D46"
+        android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/backHomeBtn"
         app:strokeColor="#264D46"
-        app:strokeWidth="2dp"/>
+        app:strokeWidth="2dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

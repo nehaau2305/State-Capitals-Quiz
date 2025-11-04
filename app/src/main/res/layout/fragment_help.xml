@@ -5,6 +5,7 @@
     android:id="@+id/ScrollView01"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#EAF6F4"
     android:scrollbars="horizontal|vertical">
 
     <LinearLayout
