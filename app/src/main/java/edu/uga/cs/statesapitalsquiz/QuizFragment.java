@@ -24,21 +24,43 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
-/** Hosts the quiz (6 questions, swipe horizontally). */
+/** QuizFragments initializes the quiz with a ViewPager to enable horizontal swiping
+ * to the next question. The user will navigate through 6 questions with randomly picked
+ * states & their cities before viewing their final score for the quiz. */
 public class QuizFragment extends Fragment {
 
+    // initialize variables
     private DBHelper dbHelper;
     private ViewPager2 viewPager;
     private int quizId;
 
+    // default QuizFragment constructor
     public QuizFragment() { }
 
+    /**
+     * onCreateView inflates the quiz fragment layout
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here
+     *
+     * @return the inflated quiz fragment view
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_quiz, container, false);
     }
 
+    /**
+     * onViewCreated initializes the quiz view pager and database helper.
+     * @param view The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -101,6 +123,10 @@ public class QuizFragment extends Fragment {
             return bundles;
         }
 
+        /**
+         * onPostExecute initializes the quiz with all 6 questions and the results page.
+         * @param bundles The result of the operation computed by {@link #doInBackground}.
+         */
         @Override
         protected void onPostExecute(ArrayList<Bundle> bundles) {
             // Build fragments on the main thread using public static inner classes
@@ -143,6 +169,9 @@ public class QuizFragment extends Fragment {
 
     /* ===================== Question page ===================== */
 
+    /**
+     * QuestionPageFragment extends Fragment to represent a single question page in the quiz.
+     */
     public static class QuestionPageFragment extends Fragment {
 
         private String stateName, correctCapital;
@@ -150,8 +179,17 @@ public class QuizFragment extends Fragment {
         private int quizId;
         private DBHelper dbHelper;
 
+        // default empty constructor
         public QuestionPageFragment() { }
 
+        /**
+         * QuestionPageFragment is a factory method to create a new instance of QuestionPageFragment.
+         * @param state randomly selected state
+         * @param correct capital city of given state
+         * @param options other cities for given state
+         * @param quizId the id of the current quiz
+         * @return a new instance of QuestionPageFragment with the provided arguments
+         */
         public static QuestionPageFragment newInstance(String state,
                                                        String correct,
                                                        String[] options,
@@ -166,6 +204,12 @@ public class QuizFragment extends Fragment {
             return f;
         }
 
+        /**
+         * onCreate initializes the fragment using the saved instance state & initializes
+         * the database helper to save the quiz results.
+         * @param savedInstanceState If the fragment is being re-created from
+         * a previous saved state, this is the state.
+         */
         @Override
         public void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -179,6 +223,18 @@ public class QuizFragment extends Fragment {
             dbHelper = new DBHelper(requireContext());
         }
 
+        /**
+         * onCreateView inflates the question fragment.
+         * @param inflater The LayoutInflater object that can be used to inflate
+         * any views in the fragment.
+         * @param container If non-null, this is the parent view that the fragment's
+         * UI should be attached to.  The fragment should not add the view itself,
+         * but this can be used to generate the LayoutParams of the view.
+         * @param savedInstanceState If non-null, this fragment is being re-constructed
+         * from a previous saved state as given here.
+         *
+         * @return the inflated fragment layout
+         */
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater,
                                  ViewGroup container,
@@ -186,6 +242,13 @@ public class QuizFragment extends Fragment {
             return inflater.inflate(R.layout.fragment_question, container, false);
         }
 
+        /**
+         * onViewCreated sets up the UI elements to handle answer selection & immediately updates
+         * the database after the user selects their response.
+         * @param view The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+         * @param savedInstanceState If non-null, this fragment is being re-constructed
+         * from a previous saved state as given here.
+         */
         @Override
         public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
             TextView stateText  = view.findViewById(R.id.textView5);
@@ -218,6 +281,10 @@ public class QuizFragment extends Fragment {
 
     /* ===================== Results page ===================== */
 
+    /**
+     * ResultsPageFragment extends Fragment to display the user's final score from
+     * the quiz immediately after hte user answers the final question of the quiz.
+     */
     public static class ResultsPageFragment extends Fragment {
 
         private static final int TOTAL_QUESTIONS = 6;
@@ -227,6 +294,11 @@ public class QuizFragment extends Fragment {
 
         public ResultsPageFragment() { }
 
+        /**
+         * ResultsPageFragment is a factory method to create a new instance of the ResultsPageFragment
+         * @param quizId the unique id, the primary key, of the quiz
+         * @return the new instance of the results page fragment
+         */
         public static ResultsPageFragment newInstance(int quizId) {
             ResultsPageFragment f = new ResultsPageFragment();
             Bundle b = new Bundle();
@@ -235,6 +307,12 @@ public class QuizFragment extends Fragment {
             return f;
         }
 
+        /**
+         * onCreate initializes the fragment by retrieving the quiz id & creating the
+         * database helper.
+         * @param savedInstanceState If the fragment is being re-created from
+         * a previous saved state, this is the state.
+         */
         @Override
         public void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -243,6 +321,18 @@ public class QuizFragment extends Fragment {
             dbHelper = new DBHelper(requireContext());
         }
 
+        /**
+         * onCreateView inflates the results page layout.
+         * @param inflater The LayoutInflater object that can be used to inflate
+         * any views in the fragment,
+         * @param container If non-null, this is the parent view that the fragment's
+         * UI should be attached to.  The fragment should not add the view itself,
+         * but this can be used to generate the LayoutParams of the view.
+         * @param savedInstanceState If non-null, this fragment is being re-constructed
+         * from a previous saved state as given here.
+         *
+         * @return the inflated view for the results page layout
+         */
         @Nullable
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater,
@@ -251,6 +341,13 @@ public class QuizFragment extends Fragment {
             return inflater.inflate(R.layout.fragment_results, container, false);
         }
 
+        /**
+         * onViewCreated populates the results screen with the user's quiz score & updates the database.
+         * From here, the user can navigate to the home or splash page, or the quiz history page.
+         * @param view The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+         * @param savedInstanceState If non-null, this fragment is being re-constructed
+         * from a previous saved state as given here.
+         */
         @Override
         public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
             // compute score

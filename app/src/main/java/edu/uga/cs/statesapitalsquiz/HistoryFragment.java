@@ -18,8 +18,9 @@ import android.widget.ListView;
 import java.util.ArrayList;
 
 /**
- * The HistoryFragment will query the database to display all of the user's
- * past quizzes.
+ * The HistoryFragment extends Fragment to query the database to display all of the user's
+ * past quizzes ordered from most recent to oldest. It will include each quiz's date
+ * & time of completion as well as score.
  */
 
 public class HistoryFragment extends Fragment {
@@ -28,15 +29,35 @@ public class HistoryFragment extends Fragment {
     private ArrayList<String> quizHistory;
     private ArrayAdapter<String> adapter;
 
+    // empty constructor
     public HistoryFragment() {
     }
 
+    /**
+     * onCreateView inflates the layout for hte quiz history fragment.
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_history, container, false);
     }
 
+    /**
+     * onViewCreated initializes a new array list for all the past quizzes, an array adapter,
+     * & database helper.
+     * @param view The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -55,8 +76,19 @@ public class HistoryFragment extends Fragment {
         new LoadHistoryTask().execute();
     }
 
+    /**
+     * LoadHistoryTask extends AsyncTask to asynchronously load the user's past quizzes
+     * from the database.
+     */
     private class LoadHistoryTask extends AsyncTask<Void, Void, ArrayList<String>> {
 
+        /**
+         * doInBackground executes the database query of retrieving all past quizzes
+         * in the background.
+         * @param voids The parameters of the task.
+         *
+         * @return list of formatted strings of quiz information
+         */
         @Override
         protected ArrayList<String> doInBackground(Void... voids) {
             ArrayList<String> historyList = new ArrayList<>();
@@ -80,6 +112,13 @@ public class HistoryFragment extends Fragment {
             return historyList;
         }
 
+        /**
+         * onPostExecute clears the existing quiz hisotry list, adds the newly loaded
+         * results, & notifies the adapter of changes. This method displays the
+         * updated quiz history.
+         * @param result The result of the operation computed by {@link #doInBackground}.
+         *
+         */
         @Override
         protected void onPostExecute(ArrayList<String> result) {
             quizHistory.clear();

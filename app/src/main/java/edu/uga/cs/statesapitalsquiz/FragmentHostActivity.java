@@ -10,6 +10,14 @@ import androidx.fragment.app.Fragment;
  * container depending on user input.
  */
 public class FragmentHostActivity extends AppCompatActivity {
+
+    /**
+     * onCreate determines which fragment to display based on the button clicked on the
+     * splash screen.
+     * @param savedInstanceState If the activity is being re-initialized after
+     *     previously being shut down then this Bundle contains the data it most
+     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
