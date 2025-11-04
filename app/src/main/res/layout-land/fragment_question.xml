@@ -3,41 +3,34 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:background="#EAF6F4">
+    android:layout_height="match_parent"
+    android:background="#EAF6F4">
 
     <TextView
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="65dp"
-        android:gravity="center_horizontal"
-        android:paddingLeft="30dp"
-        android:paddingRight="30dp"
+        android:layout_marginTop="85dp"
+        android:fontFamily="@font/amaranth"
         android:text="What is the capital of"
         android:textColor="#264D46"
-        android:textSize="45sp"
-        android:fontFamily="@font/amaranth"
+        android:textSize="38sp"
         app:layout_constraintBottom_toTopOf="@+id/textView5"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintEnd_toStartOf="@+id/radioGroup"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/textView5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="95dp"
+        android:fontFamily="@font/amaranth"
         android:text="stateName"
         android:textColor="#C7AA00"
-        android:textSize="60dp"
-        android:fontFamily="@font/amaranth"
-        app:layout_constraintBottom_toTopOf="@+id/radioGroup"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.495"
+        android:textSize="55sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/radioGroup"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView4" />
 
@@ -45,11 +38,10 @@
         android:id="@+id/radioGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView5">
+        app:layout_constraintStart_toEndOf="@+id/textView5"
+        app:layout_constraintTop_toTopOf="parent">
 
         <RadioButton
             android:id="@+id/radioButton"
@@ -58,7 +50,7 @@
             android:text="city"
             android:fontFamily="@font/amaranth"
             android:textColor="#264D46"
-            android:textSize="25sp" />
+            android:textSize="28sp" />
 
         <RadioButton
             android:id="@+id/radioButton2"
@@ -67,7 +59,7 @@
             android:text="city"
             android:fontFamily="@font/amaranth"
             android:textColor="#264D46"
-            android:textSize="25sp" />
+            android:textSize="28sp" />
 
         <RadioButton
             android:id="@+id/radioButton3"
@@ -76,6 +68,6 @@
             android:text="city"
             android:fontFamily="@font/amaranth"
             android:textColor="#264D46"
-            android:textSize="25sp" />
+            android:textSize="28sp" />
     </RadioGroup>
 </androidx.constraintlayout.widget.ConstraintLayout>
