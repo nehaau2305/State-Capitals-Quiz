@@ -34,7 +34,7 @@ public class QuizFragment extends Fragment {
     private int quizId;
     private LoadQuizTask loadTask;
 
-    public QuizFragment() { }
+    public QuizFragment() {}
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -161,7 +161,7 @@ public class QuizFragment extends Fragment {
         private int quizId;
         private DBHelper dbHelper;
 
-        public QuestionPageFragment() { }
+        public QuestionPageFragment() {}
 
         public static QuestionPageFragment newInstance(String state,
                                                        String correct,
@@ -205,21 +205,21 @@ public class QuizFragment extends Fragment {
             RadioButton rb2 = view.findViewById(R.id.radioButton2);
             RadioButton rb3 = view.findViewById(R.id.radioButton3);
 
-            // Set up question text
+            // set state and choices
             stateText.setText(stateName);
-            RadioButton[] buttons = { rb1, rb2, rb3 };
+            RadioButton[] buttons = {rb1, rb2, rb3};
             for (int i = 0; i < choices.length; i++) {
                 buttons[i].setText((i + 1) + ". " + choices[i]);
             }
 
-            // Save selected answer
+            // handle user selection (allow changes before moving on)
             group.setOnCheckedChangeListener((g, id) -> {
                 RadioButton sel = view.findViewById(id);
                 if (sel != null) {
                     String selected = sel.getText().toString().trim();
                     String correctAns = correctCapital.trim();
 
-                    // Remove numbering like "1. Atlanta"
+                    // remove numbering like "1. Atlanta"
                     if (selected.contains(".")) {
                         selected = selected.substring(selected.indexOf('.') + 1).trim();
                     }
@@ -227,15 +227,20 @@ public class QuizFragment extends Fragment {
                     int correct = selected.equalsIgnoreCase(correctAns) ? 1 : 0;
 
                     SQLiteDatabase db = dbHelper.openDatabase();
+
+                    // delete old answer for this question
+                    db.delete("question", "quiz_id=? AND state=?", new String[]{
+                            String.valueOf(quizId), stateName
+                    });
+
+                    // insert new answer
                     android.content.ContentValues vals = new android.content.ContentValues();
                     vals.put("quiz_id", quizId);
                     vals.put("state", stateName);
                     vals.put("correct", correct);
                     db.insert("question", null, vals);
-                    db.close();
 
-                    // Prevent multiple inserts
-                    group.setOnCheckedChangeListener(null);
+                    db.close();
                 }
             });
         }
@@ -248,7 +253,7 @@ public class QuizFragment extends Fragment {
         private int quizId;
         private DBHelper dbHelper;
 
-        public ResultsPageFragment() { }
+        public ResultsPageFragment() {}
 
         public static ResultsPageFragment newInstance(int quizId) {
             ResultsPageFragment f = new ResultsPageFragment();
