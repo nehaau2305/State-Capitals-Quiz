@@ -24,67 +24,60 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
-/** QuizFragments initializes the quiz with a ViewPager to enable horizontal swiping
+/**
+ * QuizFragments initializes the quiz with a ViewPager to enable horizontal swiping
  * to the next question. The user will navigate through 6 questions with randomly picked
- * states & their cities before viewing their final score for the quiz. */
+ * states & their cities before viewing their final score for the quiz.
+ */
 public class QuizFragment extends Fragment {
 
-    // initialize variables
+    // variables
     private DBHelper dbHelper;
     private ViewPager2 viewPager;
     private int quizId;
+    private LoadQuizTask loadTask; // keep a reference to cancel if destroyed
 
-    // default QuizFragment constructor
     public QuizFragment() { }
 
-    /**
-     * onCreateView inflates the quiz fragment layout
-     * @param inflater The LayoutInflater object that can be used to inflate
-     * any views in the fragment
-     * @param container If non-null, this is the parent view that the fragment's
-     * UI should be attached to.  The fragment should not add the view itself,
-     * but this can be used to generate the LayoutParams of the view
-     * @param savedInstanceState If non-null, this fragment is being re-constructed
-     * from a previous saved state as given here
-     *
-     * @return the inflated quiz fragment view
-     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_quiz, container, false);
     }
 
-    /**
-     * onViewCreated initializes the quiz view pager and database helper.
-     * @param view The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
-     * @param savedInstanceState If non-null, this fragment is being re-constructed
-     * from a previous saved state as given here.
-     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewPager = view.findViewById(R.id.viewPager);
-        dbHelper  = new DBHelper(requireContext());
-        new LoadQuizTask().execute();
+        dbHelper = new DBHelper(requireContext());
+        loadTask = new LoadQuizTask();
+        loadTask.execute();
     }
 
-    /* Background: pick states + create quiz row. Foreground: build pages. */
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // cancel async task if still running to avoid post-execute crash
+        if (loadTask != null && !loadTask.isCancelled()) {
+            loadTask.cancel(true);
+        }
+    }
+
+    /* ===================== LoadQuizTask ===================== */
     private class LoadQuizTask extends AsyncTask<Void, Void, ArrayList<Bundle>> {
 
         @Override
         protected ArrayList<Bundle> doInBackground(Void... voids) {
-            // ensure DB exists (just in case of first-run race)
-            if (!dbHelper.checkDatabaseExists()) dbHelper.copyDatabaseFromAssets();
+            if (isCancelled()) return null;
 
+            if (!dbHelper.checkDatabaseExists()) dbHelper.copyDatabaseFromAssets();
             SQLiteDatabase db = dbHelper.openDatabase();
 
-            // 1) Read all states and thei three cities
             ArrayList<String[]> rows = new ArrayList<>();
             Cursor c = db.rawQuery(
                     "SELECT state, capital_city, second_city, third_city FROM states", null);
             while (c.moveToNext()) {
-                rows.add(new String[] {
+                rows.add(new String[]{
                         c.getString(0), // state
                         c.getString(1), // capital (correct)
                         c.getString(2), // second city
@@ -93,18 +86,17 @@ public class QuizFragment extends Fragment {
             }
             c.close();
 
-            // 2) Pick 6 random states
             Collections.shuffle(rows);
             ArrayList<String[]> chosen = new ArrayList<>(rows.subList(0, 6));
 
-            // 3) Create quiz record and remember its id
             quizId = createQuizRecord(db);
             db.close();
 
-            // 4) Prepare each question page
             ArrayList<Bundle> bundles = new ArrayList<>();
             for (String[] row : chosen) {
-                String state   = row[0];
+                if (isCancelled()) return null;
+
+                String state = row[0];
                 String correct = row[1];
 
                 ArrayList<String> options = new ArrayList<>();
@@ -124,12 +116,17 @@ public class QuizFragment extends Fragment {
         }
 
         /**
-         * onPostExecute initializes the quiz with all 6 questions and the results page.
-         * @param bundles The result of the operation computed by {@link #doInBackground}.
+         * Fixed onPostExecute to prevent crash on orientation change.
          */
         @Override
         protected void onPostExecute(ArrayList<Bundle> bundles) {
-            // Build fragments on the main thread using public static inner classes
+            if (bundles == null || isCancelled()) return;
+
+            // 🚨 Prevent crash if fragment was destroyed during rotation
+            if (!isAdded() || getActivity() == null || viewPager == null) {
+                return;
+            }
+
             ArrayList<Fragment> pages = new ArrayList<>();
             for (Bundle args : bundles) {
                 QuestionPageFragment f = QuestionPageFragment.newInstance(
@@ -141,7 +138,6 @@ public class QuizFragment extends Fragment {
                 pages.add(f);
             }
 
-            // Append a final results page (page 7)
             ResultsPageFragment results = ResultsPageFragment.newInstance(quizId);
             pages.add(results);
 
@@ -154,7 +150,6 @@ public class QuizFragment extends Fragment {
         }
     }
 
-    /* Insert a quiz row and return its id. */
     private int createQuizRecord(SQLiteDatabase db) {
         String ts = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
                 .format(new Date());
@@ -167,29 +162,15 @@ public class QuizFragment extends Fragment {
         return id;
     }
 
-    /* ===================== Question page ===================== */
-
-    /**
-     * QuestionPageFragment extends Fragment to represent a single question page in the quiz.
-     */
+    /* ===================== Question Page ===================== */
     public static class QuestionPageFragment extends Fragment {
-
         private String stateName, correctCapital;
         private String[] choices;
         private int quizId;
         private DBHelper dbHelper;
 
-        // default empty constructor
         public QuestionPageFragment() { }
 
-        /**
-         * QuestionPageFragment is a factory method to create a new instance of QuestionPageFragment.
-         * @param state randomly selected state
-         * @param correct capital city of given state
-         * @param options other cities for given state
-         * @param quizId the id of the current quiz
-         * @return a new instance of QuestionPageFragment with the provided arguments
-         */
         public static QuestionPageFragment newInstance(String state,
                                                        String correct,
                                                        String[] options,
@@ -204,37 +185,19 @@ public class QuizFragment extends Fragment {
             return f;
         }
 
-        /**
-         * onCreate initializes the fragment using the saved instance state & initializes
-         * the database helper to save the quiz results.
-         * @param savedInstanceState If the fragment is being re-created from
-         * a previous saved state, this is the state.
-         */
         @Override
         public void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             Bundle a = getArguments();
             if (a != null) {
-                stateName      = a.getString("state");
+                stateName = a.getString("state");
                 correctCapital = a.getString("correct");
-                choices        = a.getStringArray("choices");
-                quizId         = a.getInt("quizId");
+                choices = a.getStringArray("choices");
+                quizId = a.getInt("quizId");
             }
             dbHelper = new DBHelper(requireContext());
         }
 
-        /**
-         * onCreateView inflates the question fragment.
-         * @param inflater The LayoutInflater object that can be used to inflate
-         * any views in the fragment.
-         * @param container If non-null, this is the parent view that the fragment's
-         * UI should be attached to.  The fragment should not add the view itself,
-         * but this can be used to generate the LayoutParams of the view.
-         * @param savedInstanceState If non-null, this fragment is being re-constructed
-         * from a previous saved state as given here.
-         *
-         * @return the inflated fragment layout
-         */
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater,
                                  ViewGroup container,
@@ -242,20 +205,13 @@ public class QuizFragment extends Fragment {
             return inflater.inflate(R.layout.fragment_question, container, false);
         }
 
-        /**
-         * onViewCreated sets up the UI elements to handle answer selection & immediately updates
-         * the database after the user selects their response.
-         * @param view The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
-         * @param savedInstanceState If non-null, this fragment is being re-constructed
-         * from a previous saved state as given here.
-         */
         @Override
         public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-            TextView stateText  = view.findViewById(R.id.textView5);
-            RadioGroup group    = view.findViewById(R.id.radioGroup);
-            RadioButton rb1     = view.findViewById(R.id.radioButton);
-            RadioButton rb2     = view.findViewById(R.id.radioButton2);
-            RadioButton rb3     = view.findViewById(R.id.radioButton3);
+            TextView stateText = view.findViewById(R.id.textView5);
+            RadioGroup group = view.findViewById(R.id.radioGroup);
+            RadioButton rb1 = view.findViewById(R.id.radioButton);
+            RadioButton rb2 = view.findViewById(R.id.radioButton2);
+            RadioButton rb3 = view.findViewById(R.id.radioButton3);
 
             stateText.setText(stateName);
             rb1.setText(choices[0]);
@@ -273,32 +229,21 @@ public class QuizFragment extends Fragment {
                     vals.put("correct", correct);
                     db.insert("question", null, vals);
                     db.close();
-                    group.setOnCheckedChangeListener(null); // save once
+                    group.setOnCheckedChangeListener(null);
                 }
             });
         }
     }
 
-    /* ===================== Results page ===================== */
-
-    /**
-     * ResultsPageFragment extends Fragment to display the user's final score from
-     * the quiz immediately after hte user answers the final question of the quiz.
-     */
+    /* ===================== Results Page ===================== */
     public static class ResultsPageFragment extends Fragment {
 
         private static final int TOTAL_QUESTIONS = 6;
-
         private int quizId;
         private DBHelper dbHelper;
 
         public ResultsPageFragment() { }
 
-        /**
-         * ResultsPageFragment is a factory method to create a new instance of the ResultsPageFragment
-         * @param quizId the unique id, the primary key, of the quiz
-         * @return the new instance of the results page fragment
-         */
         public static ResultsPageFragment newInstance(int quizId) {
             ResultsPageFragment f = new ResultsPageFragment();
             Bundle b = new Bundle();
@@ -307,12 +252,6 @@ public class QuizFragment extends Fragment {
             return f;
         }
 
-        /**
-         * onCreate initializes the fragment by retrieving the quiz id & creating the
-         * database helper.
-         * @param savedInstanceState If the fragment is being re-created from
-         * a previous saved state, this is the state.
-         */
         @Override
         public void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -321,18 +260,6 @@ public class QuizFragment extends Fragment {
             dbHelper = new DBHelper(requireContext());
         }
 
-        /**
-         * onCreateView inflates the results page layout.
-         * @param inflater The LayoutInflater object that can be used to inflate
-         * any views in the fragment,
-         * @param container If non-null, this is the parent view that the fragment's
-         * UI should be attached to.  The fragment should not add the view itself,
-         * but this can be used to generate the LayoutParams of the view.
-         * @param savedInstanceState If non-null, this fragment is being re-constructed
-         * from a previous saved state as given here.
-         *
-         * @return the inflated view for the results page layout
-         */
         @Nullable
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater,
@@ -341,40 +268,28 @@ public class QuizFragment extends Fragment {
             return inflater.inflate(R.layout.fragment_results, container, false);
         }
 
-        /**
-         * onViewCreated populates the results screen with the user's quiz score & updates the database.
-         * From here, the user can navigate to the home or splash page, or the quiz history page.
-         * @param view The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
-         * @param savedInstanceState If non-null, this fragment is being re-constructed
-         * from a previous saved state as given here.
-         */
         @Override
         public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-            // compute score
             SQLiteDatabase db = dbHelper.openDatabase();
             int correctCount = 0;
             Cursor c = db.rawQuery(
                     "SELECT COUNT(*) FROM question WHERE quiz_id=? AND correct=1",
-                    new String[]{ String.valueOf(quizId) }
+                    new String[]{String.valueOf(quizId)}
             );
             if (c.moveToFirst()) correctCount = c.getInt(0);
             c.close();
 
-            // update quiz table with score
             db.execSQL("UPDATE quiz SET score=? WHERE id=?",
-                    new Object[]{ correctCount, quizId });
+                    new Object[]{correctCount, quizId});
             db.close();
 
-            // update UI
             TextView scoreText = view.findViewById(R.id.scoreText);
             scoreText.setText("Score: " + correctCount + " / " + TOTAL_QUESTIONS);
 
-            // buttons
-            View backHome   = view.findViewById(R.id.backHomeBtn);
-            View viewHistory= view.findViewById(R.id.viewHistoryBtn);
+            View backHome = view.findViewById(R.id.backHomeBtn);
+            View viewHistory = view.findViewById(R.id.viewHistoryBtn);
 
             backHome.setOnClickListener(v -> {
-                // Go back to MainActivity
                 Intent i = new Intent(requireContext(), MainActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(i);
@@ -382,7 +297,6 @@ public class QuizFragment extends Fragment {
             });
 
             viewHistory.setOnClickListener(v -> {
-                // Open History via FragmentHostActivity
                 Intent i = new Intent(requireContext(), FragmentHostActivity.class);
                 i.putExtra("fragmentType", "history");
                 startActivity(i);
