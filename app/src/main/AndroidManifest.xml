@@ -26,7 +26,7 @@
         <activity
             android:name=".FragmentHostActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
-            android:screenOrientation="unspecified" />
+            android:screenOrientation="fullSensor" />
 
         <!-- Preloaded fonts -->
         <meta-data

@@ -1,7 +1,9 @@
 package edu.uga.cs.statesapitalsquiz;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
@@ -25,9 +27,10 @@ public class FragmentHostActivity extends AppCompatActivity {
 
         // get fragment type from MainActivity
         String fragmentType = getIntent().getStringExtra("fragmentType");
+
         // initialize fragment
         Fragment fragment = null;
-        switch(fragmentType) {
+        switch (fragmentType) {
             case "quiz":
                 fragment = new QuizFragment();
                 break;
@@ -38,9 +41,22 @@ public class FragmentHostActivity extends AppCompatActivity {
                 fragment = new HelpFragment();
                 break;
         }
+
         // update fragment container view
-        if (fragment != null) {
-            getSupportFragmentManager().beginTransaction().replace( R.id.fragmentContainerView, fragment).commit();
+        if (fragment != null && savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainerView, fragment)
+                    .commit();
         }
+    }
+
+    /**
+     * onConfigurationChanged handles rotation by forcing layout recreation.
+     * This ensures the correct orientation layout (portrait/land) loads immediately.
+     */
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        recreate(); // reloads layout in the new orientation
     }
 }
