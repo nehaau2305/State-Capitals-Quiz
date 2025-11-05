@@ -1,6 +1,7 @@
 package edu.uga.cs.statesapitalsquiz;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -26,10 +27,6 @@ public class MainActivity extends AppCompatActivity {
     /**
      * onCreate initializes the starting activity and attaches button listeners to the start quiz,
      * view quiz history, and help buttons.
-     * @param savedInstanceState If the activity is being re-initialized after
-     *     previously being shut down then this Bundle contains the data it most
-     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
-     *
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,21 +48,30 @@ public class MainActivity extends AppCompatActivity {
         dbHelper = new DBHelper(this);
         new CopyDbTask().execute();
 
+        // 🔍 Keep database open so Database Inspector can detect it
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        // Set button listeners
         View.OnClickListener listener = v -> {
             Intent intent = new Intent(MainActivity.this, FragmentHostActivity.class);
-            if (v.getId() == R.id.button)       intent.putExtra("fragmentType", "quiz");
-            else if (v.getId() == R.id.button2) intent.putExtra("fragmentType", "history");
-            else if (v.getId() == R.id.button3) intent.putExtra("fragmentType", "help");
+            if (v.getId() == R.id.button) {
+                intent.putExtra("fragmentType", "quiz");
+            } else if (v.getId() == R.id.button2) {
+                intent.putExtra("fragmentType", "history");
+            } else if (v.getId() == R.id.button3) {
+                intent.putExtra("fragmentType", "help");
+            }
             startActivity(intent);
         };
+
         startQuizB.setOnClickListener(listener);
         viewHistoryB.setOnClickListener(listener);
         helpB.setOnClickListener(listener);
     }
 
     /**
-     * CopyDbTask extends AsyncTask to ensure the database exists. If it does not,
-     * it copies the database from the project asynchronously.
+     * CopyDbTask extends AsyncTask to ensure the database exists.
+     * If it does not, it copies the database from the project asynchronously.
      */
     private class CopyDbTask extends AsyncTask<Void, Void, Void> {
         @Override

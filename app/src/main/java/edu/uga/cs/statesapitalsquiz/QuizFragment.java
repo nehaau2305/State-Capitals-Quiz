@@ -25,17 +25,14 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * QuizFragments initializes the quiz with a ViewPager to enable horizontal swiping
- * to the next question. The user will navigate through 6 questions with randomly picked
- * states & their cities before viewing their final score for the quiz.
+ * QuizFragment manages the full quiz sequence — 6 question pages and a results page.
  */
 public class QuizFragment extends Fragment {
 
-    // variables
     private DBHelper dbHelper;
     private ViewPager2 viewPager;
     private int quizId;
-    private LoadQuizTask loadTask; // keep a reference to cancel if destroyed
+    private LoadQuizTask loadTask;
 
     public QuizFragment() { }
 
@@ -50,14 +47,17 @@ public class QuizFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewPager = view.findViewById(R.id.viewPager);
         dbHelper = new DBHelper(requireContext());
-        loadTask = new LoadQuizTask();
-        loadTask.execute();
+
+        // Only load once (prevents reset on rotation)
+        if (loadTask == null) {
+            loadTask = new LoadQuizTask();
+            loadTask.execute();
+        }
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // cancel async task if still running to avoid post-execute crash
         if (loadTask != null && !loadTask.isCancelled()) {
             loadTask.cancel(true);
         }
@@ -78,10 +78,10 @@ public class QuizFragment extends Fragment {
                     "SELECT state, capital_city, second_city, third_city FROM states", null);
             while (c.moveToNext()) {
                 rows.add(new String[]{
-                        c.getString(0), // state
-                        c.getString(1), // capital (correct)
-                        c.getString(2), // second city
-                        c.getString(3)  // third city
+                        c.getString(0),
+                        c.getString(1),
+                        c.getString(2),
+                        c.getString(3)
                 });
             }
             c.close();
@@ -95,7 +95,6 @@ public class QuizFragment extends Fragment {
             ArrayList<Bundle> bundles = new ArrayList<>();
             for (String[] row : chosen) {
                 if (isCancelled()) return null;
-
                 String state = row[0];
                 String correct = row[1];
 
@@ -115,17 +114,10 @@ public class QuizFragment extends Fragment {
             return bundles;
         }
 
-        /**
-         * Fixed onPostExecute to prevent crash on orientation change.
-         */
         @Override
         protected void onPostExecute(ArrayList<Bundle> bundles) {
             if (bundles == null || isCancelled()) return;
-
-            // 🚨 Prevent crash if fragment was destroyed during rotation
-            if (!isAdded() || getActivity() == null || viewPager == null) {
-                return;
-            }
+            if (!isAdded() || getActivity() == null || viewPager == null) return;
 
             ArrayList<Fragment> pages = new ArrayList<>();
             for (Bundle args : bundles) {
@@ -213,15 +205,27 @@ public class QuizFragment extends Fragment {
             RadioButton rb2 = view.findViewById(R.id.radioButton2);
             RadioButton rb3 = view.findViewById(R.id.radioButton3);
 
+            // Set up question text
             stateText.setText(stateName);
-            rb1.setText("1. " + choices[0]);
-            rb2.setText("2. " + choices[1]);
-            rb3.setText("3. " + choices[2]);
+            RadioButton[] buttons = { rb1, rb2, rb3 };
+            for (int i = 0; i < choices.length; i++) {
+                buttons[i].setText((i + 1) + ". " + choices[i]);
+            }
 
+            // Save selected answer
             group.setOnCheckedChangeListener((g, id) -> {
                 RadioButton sel = view.findViewById(id);
                 if (sel != null) {
-                    int correct = sel.getText().toString().equals(correctCapital) ? 1 : 0;
+                    String selected = sel.getText().toString().trim();
+                    String correctAns = correctCapital.trim();
+
+                    // Remove numbering like "1. Atlanta"
+                    if (selected.contains(".")) {
+                        selected = selected.substring(selected.indexOf('.') + 1).trim();
+                    }
+
+                    int correct = selected.equalsIgnoreCase(correctAns) ? 1 : 0;
+
                     SQLiteDatabase db = dbHelper.openDatabase();
                     android.content.ContentValues vals = new android.content.ContentValues();
                     vals.put("quiz_id", quizId);
@@ -229,6 +233,8 @@ public class QuizFragment extends Fragment {
                     vals.put("correct", correct);
                     db.insert("question", null, vals);
                     db.close();
+
+                    // Prevent multiple inserts
                     group.setOnCheckedChangeListener(null);
                 }
             });
@@ -272,6 +278,7 @@ public class QuizFragment extends Fragment {
         public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
             SQLiteDatabase db = dbHelper.openDatabase();
             int correctCount = 0;
+
             Cursor c = db.rawQuery(
                     "SELECT COUNT(*) FROM question WHERE quiz_id=? AND correct=1",
                     new String[]{String.valueOf(quizId)}
