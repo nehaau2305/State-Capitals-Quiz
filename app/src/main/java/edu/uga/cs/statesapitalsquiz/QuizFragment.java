@@ -214,9 +214,9 @@ public class QuizFragment extends Fragment {
             RadioButton rb3 = view.findViewById(R.id.radioButton3);
 
             stateText.setText(stateName);
-            rb1.setText(choices[0]);
-            rb2.setText(choices[1]);
-            rb3.setText(choices[2]);
+            rb1.setText("1. " + choices[0]);
+            rb2.setText("2. " + choices[1]);
+            rb3.setText("3. " + choices[2]);
 
             group.setOnCheckedChangeListener((g, id) -> {
                 RadioButton sel = view.findViewById(id);
