@@ -50,13 +50,6 @@ Android application that quizzes users on the capitals of the states of the Unit
   <img src="images/quiz_help.png" width="200">
 </a>
 
-## Technologies Used
-- Language: Java
-- IDE: Android Studio
-- Build System: Gradle
-- UI Layouts: XML
-- Testing Environment: Android Emulator
-
 ## Prerequisites
 - Android Studio installed (version 2025.1.4 or newer)
 - JDK 17+
